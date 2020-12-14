@@ -4,48 +4,57 @@ var params = new URLSearchParams(window.location.search);
 
 if (!params.has('nombre') || !params.has('sala')) {
     window.location = 'index.html';
-    throw new Error('El nombre y sala son necesario');
+    throw new Error('El nombre y sala son necesarios');
 }
 
 var usuario = {
     nombre: params.get('nombre'),
     sala: params.get('sala')
-}
+};
 
-socket.on('connect', () => {
+
+
+socket.on('connect', function() {
     console.log('Conectado al servidor');
 
     socket.emit('entrarChat', usuario, function(resp) {
+        renderizarUsuarios(resp);
+        //console.log('Usuarios conectados', resp);
+    });
 
-        console.log('Usuarios conectados', resp);
-    })
-});
-socket.on('disconnect', () => {
-    console.log('Perdimos conexion con el servidor');
 });
 
-//ENVIAR INFORMACION
+// escuchar
+socket.on('disconnect', function() {
 
-/*socket.emit('crearMensaje', {
-    mensaje: 'Hola Mundo'
-}, function(resp) {
-    console.log('RESPUETA SERVER:', resp)
+    console.log('Perdimos conexión con el servidor');
+
 });
-*/
 
-//ESCUCHAR INFORMACION
+
+// Enviar información
+// socket.emit('crearMensaje', {
+//     nombre: 'Fernando',
+//     mensaje: 'Hola Mundo'
+// }, function(resp) {
+//     console.log('respuesta server: ', resp);
+// });
+
+// Escuchar información
 socket.on('crearMensaje', function(mensaje) {
-    console.log('Servidor:', mensaje)
+    renderizarMenajes(mensaje, false);
+    scrollBottom()
 });
 
-//ESCUCHAR CAMBIOS DE USUARIOS, CUANDO UN USUARIO SALE O ENTRA AL CHAT
-
+// Escuchar cambios de usuarios
+// cuando un usuario entra o sale del chat
 socket.on('listaPersona', function(personas) {
-    console.log('Servidor:', personas);
+    renderizarUsuarios(personas);
 });
 
-//MENSAJES PRIVADOS
+// Mensajes privados
+socket.on('mensajePrivado', function(mensaje) {
 
-socket.on('mensajePrivado', (mensaje) => {
-    console.log('Mensaje Privado', mensaje);
-})
+    console.log('Mensaje Privado:', mensaje);
+
+});
